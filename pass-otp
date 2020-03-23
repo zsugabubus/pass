@@ -1,0 +1,33 @@
+#!/usr/bin/dash -eu
+#
+# Usage:
+# $ ./pass-otp
+# $ OTP_SECRET=$(echo -n XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX | base32 -d)
+# $ totp now
+
+OTP_PERIOD=30
+OTP_ALGORITHM=sha1
+OTP_DIGITS=6
+
+hotp() {
+	# https://tools.ietf.org/html/rfc4226
+	hmac=$(
+		printf %16s $(dc -e "16o ${1?Missing counter} p") |
+		tr ' ' '0' |
+		basenc --decode --base16 |
+		openssl dgst "-$OTP_ALGORITHM" -hmac "${OTP_SECRET?OTP secret missing}" |
+		cut -d' ' -f2 |
+		tr a-z A-Z
+	)
+	unset OTP_SECRET
+	hotp=$(dc -e "10 $OTP_DIGITS ^ 16 i $hmac 2 10 $hmac 10 % - 8 * ^ / 80000000 % r% p")
+	printf "%0${OTP_DIGITS}d\n" $hotp
+	unset hmac
+}
+
+totp() {
+	# https://tools.ietf.org/html/rfc6238
+	counter=$(( $(date --date "${1:-now}" +%s) / OTP_PERIOD ))
+	hotp "$counter"
+	unset counter
+}

@@ -1,0 +1,10 @@
+#!/bin/dash -eu
+
+PROFILE=
+EXCLUDE_mutt='\#`"'"'"';$@'
+EXCLUDE_neomutt=EXCLUDE_mutt
+LENGTH=80
+
+tr </dev/urandom -dc '0-9A-Za-z!"#$%&'"'"'()*+,-./:;<=>?@[\]^_`{|}~' |
+	tr -d "$(eval 'printf %s $EXCLUDE_'$PROFILE)" |
+	head -c"$LENGTH"
