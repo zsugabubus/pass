@@ -1,6 +1,0 @@
-#!/usr/bin/dash -eu
-PWDIR="${XDG_CONFIG_HOME:-$HOME/.config}/password-store"
-SECRET=$(gpg --batch --quiet --decrypt "$PWDIR/${1%.gpg}.gpg")
-PASSWD=$(printf %s "$SECRET" | head -n1)
-printf %s "$PASSWD" | xclip -in -rmlastnl -loops 1 -selection primary
-printf 'Secret copied to clipboard'

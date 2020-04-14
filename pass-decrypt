@@ -1,0 +1,7 @@
+#!/usr/bin/dash -eu
+for f in ${XDG_CONFIG_DIR:-~/.config}/pass/decrypt.pre.d/*; do
+  if test -f "$f" -a -x "$f"; then
+    "$f"
+  fi
+done
+gpg --batch --quiet --decrypt "${1%.gpg}.gpg"

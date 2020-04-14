@@ -1,0 +1,13 @@
+#!/usr/bin/dash -eu
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+length=${1:-80}
+profile=${2:-}
+
+exclude_=
+exclude_mutt='\#`"'"'"';$@'
+exclude_neomutt=$exclude_mutt
+
+tr </dev/urandom -dc '0-9A-Za-z!"#$%&'"'"'()*+,-./:;<=>?@[\]^_`{|}~' \
+| tr -d "$(eval 'printf %s $exclude_'$profile)" \
+| head -c"$length"

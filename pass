@@ -1,0 +1,15 @@
+#!/usr/bin/dash -eu
+# SPDX-License-Identifier: GPL-3.0-or-later
+cd -- "${XDG_CONFIG_HOME:-$HOME/.config}/passwords"
+if test $# -ge 1; then
+  cmd=$1
+  shift
+else
+  cmd=default
+fi
+for exe in "pass-$cmd" "/usr/lib/pass/pass-$cmd"; do
+  if command -v "$exe" >/dev/null; then
+    exec "$exe" $@
+  fi
+done
+echo Unknown command: $cmd

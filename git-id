@@ -1,0 +1,5 @@
+#!/usr/bin/dash -eu
+# SPDX-License-Identifier: GPL-3.0-or-later
+pass decrypt "$1" |
+  sed 's/^git\.\([a-z.]\+\):\(.*\)$/\1\n\2/;t;d' |
+  xargs -L2 git config --local

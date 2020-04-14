@@ -1,0 +1,38 @@
+#!/usr/bin/dash -eu
+# SPDX-License-Identifier: GPL-3.0-or-later
+if test -z "${1:-}"; then
+  name=$(find -name '.*' -o -type f -printf '%P\n' | sed 's/\.gpg$//' | fzf)
+  set -- "$name"
+fi
+
+if test -n "${WAYLAND_DISPLAY:-}"; then
+  copy='wl-copy --primary --paste-once --foreground'
+else
+  copy='xclip -in -rmlastnl -loops 1 -selection primary -verbose'
+fi
+
+pass decrypt "$1" | {
+  read -r password
+  read -r username
+  if test -n "$username"; then
+    printf '\033[2K\rLogin copied to clipboard.'
+    printf '%s' "$username" | $copy 2>/dev/null
+  fi
+  if test -n "$password"; then
+    printf '\033[2K\rPassword copied to clipboard.'
+    printf '%s' "$password" | $copy 2>/dev/null
+  fi
+
+  while IFS=': ' read key value; do
+    if test "$key" = otpauth; then
+      . /usr/lib/libotpsh
+      until {
+        t=$((30 - 3$(date +%S) % 30))
+        printf '\033[2K\rOTP copied to clipboard. (T-%d)' "$t"
+        otpauth "$value" | timeout "$t" $copy 2>/dev/null || test $? -ne 124
+      }
+      do :; done
+    fi
+  done
+  printf '\033[F'
+}
